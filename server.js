@@ -363,4 +363,115 @@ function updateEmployeeManager() {
   });
 }
 
+function removeEmployee() {
+  let employees = ["No Employee"];
+  // First get the list of roles
+  database.query("SELECT * FROM employee", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].first_name && res[i].last_name) {
+        employees.push(`${res[i].first_name} ${res[i].last_name}`);
+      }
+    }
+
+    // Get the employee details
+    let question = "Select the employee to remove?";
+    inquirer
+      .prompt([
+        {
+          name: "employee",
+          type: "list",
+          message: question,
+          choices: employees,
+        },
+      ])
+      .then((data) => {
+        // get the role to remove
+        for (let i = 0; i < res.length; i++) {
+          if (`${res[i].first_name} ${res[i].last_name}` === data.employee) {
+            employee.setProperties(res[i]);
+            employee.deleteEmployee();
+            break;
+          }
+        }
+        start();
+      });
+  });
+}
+
+function removeRole() {
+  let roles = ["No Role"];
+  // First get the list of roles
+  database.query("SELECT * FROM role", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].title) {
+        roles.push(res[i].title);
+      }
+    }
+
+    // Get the role details
+    let question = "Select the role to remove?";
+    inquirer
+      .prompt([
+        {
+          name: "role",
+          type: "list",
+          message: question,
+          choices: roles,
+        },
+      ])
+      .then((data) => {
+        // get the role to remove
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].title === data.role) {
+            role.setProperties(res[i]);
+            role.deleteRole();
+            break;
+          }
+        }
+        start();
+      });
+  });
+}
+
+function removeDepartment() {
+  let departments = ["No Department"];
+  // First get the list of departments
+  database.query("SELECT * FROM department", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].name) {
+        departments.push(res[i].name);
+      }
+    }
+
+    // Get the role details
+    let question = "Select the department to remove?";
+    inquirer
+      .prompt([
+        {
+          name: "department",
+          type: "list",
+          message: question,
+          choices: departments,
+        },
+      ])
+      .then((data) => {
+        // get the department to remove
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].name === data.department) {
+            department.setProperties(res[i]);
+            department.deleteDepartment();
+            break;
+          }
+        }
+        start();
+      });
+  });
+}
+
 start();
