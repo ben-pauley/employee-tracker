@@ -2,7 +2,7 @@ const mysql = require("mysql");
 
 const DBNAME = "employee_db";
 const HOST = "localhost";
-const PORT = 3001;
+const PORT = 3306;
 const USER = "root";
 const PASS = "root";
 
