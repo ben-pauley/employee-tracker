@@ -474,4 +474,41 @@ function removeDepartment() {
   });
 }
 
+function employeesByManager() {
+  let managers = [];
+
+  database.query("SELECT * FROM employee ", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].first_name) {
+        managers.push(`${res[i].first_name} ${res[i].last_name}`);
+      }
+    }
+
+    let question = "Which manager's employees would you like to view?";
+    inquirer
+      .prompt([
+        {
+          name: "manager",
+          type: "list",
+          message: question,
+          choices: managers,
+        },
+      ])
+      .then((data) => {
+        let managerId = null;
+        for (let i = 0; i < res.length; i++) {
+          if (`${res[i].first_name} ${res[i].last_name}` === data.manager) {
+            // set managerId to the id of the manager the user choice
+            managerId = res[i].id;
+            break;
+          }
+        }
+        employee.viewByManager(managerId);
+        start();
+      });
+  });
+}
+
 start();
