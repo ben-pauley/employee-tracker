@@ -93,4 +93,150 @@ function menuOptions(data) {
   }
 }
 
+function addDepartment() {
+  let question = "What department would you like to add?";
+  inquirer
+    .prompt({
+      name: "department",
+      type: "input",
+      message: question,
+    })
+    .then((data) => {
+      department.insertDepartment(data.department);
+      start();
+    });
+}
+
+function addRole() {
+  let departments = ["No Department"];
+
+  database.query("SELECT * FROM department", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].name) {
+        departments.push(res[i].name);
+      }
+    }
+    let questions = [
+      "What is the role title you would like to add?",
+      "What is the role salary?",
+      "What is the role department?",
+    ];
+    inquirer
+      .prompt([
+        {
+          name: "title",
+          type: "input",
+          message: questions[0],
+        },
+        {
+          name: "salary",
+          type: "number",
+          message: questions[1],
+        },
+        {
+          name: "department",
+          type: "list",
+          message: questions[2],
+          choices: departments,
+        },
+      ])
+      .then((data) => {
+        let departmentId = null;
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].name === data.department) {
+            departmentId = res[i].id;
+            break;
+          }
+        }
+        role.insertRole(data.title, data.salary, departmentId);
+        start();
+      });
+  });
+}
+
+function addEmployee() {
+  let roles = ["No Role"];
+  let managers = ["No Manager"];
+
+  database.query("SELECT * FROM role", function (err, roleRes) {
+    if (err) throw err;
+
+    for (let i = 0; i < roleRes.length; i++) {
+      if (roleRes[i].title) {
+        roles.push(roleRes[i].title);
+      }
+    }
+
+    database.query("SELECT * from employee", function (err, empRes) {
+      if (err) throw err;
+
+      for (let i = 0; i < empRes.length; i++) {
+        if (empRes[i].first_name) {
+          managers.push(`${empRes[i].first_name} ${empRes[i].last_name}`);
+        }
+      }
+
+      let questions = [
+        "What is the employee first name?",
+        "What is the employee last name?",
+        "What is the employee role?",
+        "Who is the employee manager?",
+      ];
+      inquirer
+        .prompt([
+          {
+            name: "firstName",
+            type: "input",
+            message: questions[0],
+          },
+          {
+            name: "lastName",
+            type: "input",
+            message: questions[1],
+          },
+          {
+            name: "role",
+            type: "list",
+            message: questions[2],
+            choices: roles,
+          },
+          {
+            name: "manager",
+            type: "list",
+            message: questions[3],
+            choices: managers,
+          },
+        ])
+        .then((data) => {
+          let roleId = null;
+          for (let i = 0; i < roleRes.length; i++) {
+            if (roleRes[i].title === data.role) {
+              roleId = roleRes[i].id;
+              break;
+            }
+          }
+
+          let managerId = null;
+          for (let i = 0; i < empRes.length; i++) {
+            if (
+              `${empRes[i].first_name} ${empRes[i].last_name}` === data.manager
+            ) {
+              managerId = empRes[i].id;
+              break;
+            }
+          }
+          employee.insertEmployee(
+            data.firstName,
+            data.lastName,
+            roleId,
+            managerId
+          );
+          start();
+        });
+    });
+  });
+}
+
 start();
