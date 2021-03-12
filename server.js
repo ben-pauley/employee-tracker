@@ -511,4 +511,41 @@ function employeesByManager() {
   });
 }
 
+function totalBudgetUsed() {
+  let departments = [];
+
+  database.query("SELECT * FROM department ", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].name) {
+        departments.push(res[i].name);
+      }
+    }
+
+    let question =
+      "Which department's total utilised budget would you like to view?";
+    inquirer
+      .prompt([
+        {
+          name: "department",
+          type: "list",
+          message: question,
+          choices: departments,
+        },
+      ])
+      .then((data) => {
+        let departmentId = null;
+        for (let i = 0; i < res.length; i++) {
+          if (res[i].name === data.department) {
+            departmentId = res[i].id;
+            break;
+          }
+        }
+        employee.viewBudgetUsed(departmentId);
+        start();
+      });
+  });
+}
+
 start();
