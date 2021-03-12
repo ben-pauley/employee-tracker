@@ -239,4 +239,128 @@ function addEmployee() {
   });
 }
 
+function updateEmployeeRole() {
+  let roles = ["No Role"];
+  let employees = [];
+
+  database.query("SELECT * FROM role", function (err, roleRes) {
+    if (err) throw err;
+
+    for (let i = 0; i < roleRes.length; i++) {
+      if (roleRes[i].title) {
+        roles.push(roleRes[i].title);
+      }
+    }
+
+    // Next get list of possible managers
+    database.query("SELECT * from employee", function (err, empRes) {
+      if (err) throw err;
+
+      for (let i = 0; i < empRes.length; i++) {
+        if (empRes[i].first_name) {
+          employees.push(`${empRes[i].first_name} ${empRes[i].last_name}`);
+        }
+      }
+
+      // Get the employee details
+      let questions = [
+        "Whose role would you like to update?",
+        "What is their new role??",
+      ];
+      inquirer
+        .prompt([
+          {
+            name: "employee",
+            type: "list",
+            message: questions[0],
+            choices: employees,
+          },
+          {
+            name: "role",
+            type: "list",
+            message: questions[1],
+            choices: roles,
+          },
+        ])
+        .then((data) => {
+          // get the role to tie to
+          let roleId = null;
+          for (let i = 0; i < roleRes.length; i++) {
+            if (roleRes[i].title === data.role) {
+              roleId = roleRes[i].id;
+              break;
+            }
+          }
+          // Get the employee to update to
+          for (let i = 0; i < empRes.length; i++) {
+            if (
+              `${empRes[i].first_name} ${empRes[i].last_name}` === data.employee
+            ) {
+              employee.setProperties(empRes[i]);
+              employee.role_id = roleId;
+              employee.updateEmployee();
+              break;
+            }
+          }
+          start();
+        });
+    });
+  });
+}
+
+function updateEmployeeManager() {
+  let managers = ["No Manager"];
+  let employees = [];
+
+  database.query("SELECT * FROM employee ", function (err, res) {
+    if (err) throw err;
+
+    for (let i = 0; i < res.length; i++) {
+      if (res[i].first_name) {
+        employees.push(`${res[i].first_name} ${res[i].last_name}`);
+        managers.push(`${res[i].first_name} ${res[i].last_name}`);
+      }
+    }
+
+    // Get the employee details
+    let questions = [
+      "Whose manager would you like to update?",
+      "Who is their new manager?",
+    ];
+    inquirer
+      .prompt([
+        {
+          name: "employee",
+          type: "list",
+          message: questions[0],
+          choices: employees,
+        },
+        {
+          name: "manager",
+          type: "list",
+          message: questions[1],
+          choices: managers,
+        },
+      ])
+      .then((data) => {
+        let managerId = null;
+        for (let i = 0; i < res.length; i++) {
+          if (`${res[i].first_name} ${res[i].last_name}` === data.manager) {
+            managerId = res[i].id;
+            break;
+          }
+        }
+        for (let i = 0; i < res.length; i++) {
+          if (`${res[i].first_name} ${res[i].last_name}` === data.employee) {
+            employee.setProperties(res[i]);
+            employee.manager_id = managerId;
+            employee.updateEmployee();
+            break;
+          }
+        }
+        start();
+      });
+  });
+}
+
 start();
